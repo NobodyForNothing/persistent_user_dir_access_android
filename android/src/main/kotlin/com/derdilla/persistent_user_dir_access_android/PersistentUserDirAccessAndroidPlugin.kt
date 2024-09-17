@@ -2,6 +2,7 @@ package com.derdilla.persistent_user_dir_access_android
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.startActivityForResult
 
@@ -13,6 +14,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 
 /** PersistentUserDirAccessAndroidPlugin */
 class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -52,31 +56,42 @@ class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, Ac
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) = onAttachedToActivity(binding)
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "requestDirectoryUri") {
+    when (call.method) {
+        "requestDirectoryUri" -> requestDirectoryUri(result)
+        "writeFile" -> writeFile(call, result)
+        else -> result.notImplemented()
+    }
+  }
+
+  private fun requestDirectoryUri(result: Result) {
+    if (activity != null) {
       val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-      if (activity != null) {
-        lastReqCode++;
-        val code = lastReqCode
-        activity!!.addActivityResultListener { requestCode, resultCode, data ->
-          if (requestCode == code
-            && activity != null
-            && resultCode == Activity.RESULT_OK && data?.data != null) {
-            activity!!.activity.contentResolver.takePersistableUriPermission(
-              data.data!!,
-              Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-            result.success(data.data!!.toString())
-          } else {
-            result.success(null)
-          }
+      lastReqCode++;
+      val code = lastReqCode
+      activity!!.addActivityResultListener { requestCode, resultCode, data ->
+        if (requestCode != code) {
+          false
+        } else if (activity != null
+          && resultCode == Activity.RESULT_OK && data?.data != null) {
+          activity!!.activity.contentResolver.takePersistableUriPermission(
+            data.data!!,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+          )
+          result.success(data.data!!.toString())
+          true
+        } else {
+          result.success(null)
           true
         }
-        activity!!.activity.startActivityForResult(intent, code)
-      } else {
-        result.error("NoAct", "No active android activity", null)
+
       }
+      activity!!.activity.startActivityForResult(intent, code)
     } else {
-      result.notImplemented()
+      result.error("NoAct", "No active android activity", null)
     }
+  }
+
+  private fun writeFile(call: MethodCall, result: Result) {
+
   }
 }
