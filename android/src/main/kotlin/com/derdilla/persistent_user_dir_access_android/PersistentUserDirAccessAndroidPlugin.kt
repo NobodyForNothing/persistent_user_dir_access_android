@@ -92,6 +92,7 @@ class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, Ac
     }
   }
 
+  // Algorithm roughly follows: https://stackoverflow.com/a/61120265
   private fun writeFile(call: MethodCall, result: Result) {
     if (activity == null) {
       result.error("NoAct", "No active android activity", null)
@@ -109,21 +110,23 @@ class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, Ac
 
     // Not compiled for older platform versions so true assert is fine
     val dirUri = DocumentFile.fromTreeUri(activity!!.activity.applicationContext, Uri.parse(dir))!!
+    println("1")
     val file = try {
       dirUri.createFile(mimeType, fileName)
     } catch (e: UnsupportedOperationException) {
       result.error("IOErr", e.message, null)
       return
     }!!
+    println("1")
 
     // Open file to write. Existing content will be truncated
     try {
-      val stream = activity!!.activity.contentResolver.openOutputStream(file.uri, "wt")
-      try {
+      activity!!.activity.contentResolver.openOutputStream(file.uri, "wt").use { stream ->
+        println("1")
         stream?.write(data)
+        println("1")
         result.success(true)
-      } finally {
-        stream?.close()
+        println("1")
       }
     } catch (e: FileNotFoundException) {
       result.error("NoFile", e.message, null)
