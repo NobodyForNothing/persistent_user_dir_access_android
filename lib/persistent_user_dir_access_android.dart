@@ -5,10 +5,30 @@ class PersistentUserDirAccessAndroid {
 
   /// Request picking an external directory from the system.
   ///
-  /// Returns null when canceled or picking is not possible.
+  /// Users are responsible for persisting Returns null when canceled or picking is not possible.
   static Future<String?> requestDirectoryUri() async {
-    final uri = await _channel.invokeMethod<String>('requestDirectoryUri');
-    if (uri?.isEmpty ?? true) return null;
-    return uri;
+    try {
+      final uri = await _channel.invokeMethod<String>('requestDirectoryUri');
+      if (uri?.isEmpty ?? true) return null;
+      return uri;
+    } on PlatformException catch (e) {
+      // TODO: logging
+      return null;
+    }
+  }
+
+  static Future<bool> writeFile(String dirUri, String fileName, String mimeType, Uint8List data) async {
+    try {
+      final res = await _channel.invokeMethod<bool>('writeFile', <String, dynamic>{
+        'dir': dirUri,
+        'name': fileName,
+        'mime': mimeType,
+        'data': data,
+      });
+      return res ?? false;
+    } on PlatformException catch (e) {
+      // TODO: logging
+      return false;
+    }
   }
 }

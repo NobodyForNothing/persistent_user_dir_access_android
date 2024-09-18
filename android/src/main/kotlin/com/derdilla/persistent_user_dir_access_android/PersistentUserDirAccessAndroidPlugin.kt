@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.documentfile.provider.DocumentFile
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -17,6 +18,7 @@ import io.flutter.plugin.common.PluginRegistry
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.UnsupportedOperationException
 
 /** PersistentUserDirAccessAndroidPlugin */
 class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -83,7 +85,6 @@ class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, Ac
           result.success(null)
           true
         }
-
       }
       activity!!.activity.startActivityForResult(intent, code)
     } else {
@@ -92,6 +93,42 @@ class PersistentUserDirAccessAndroidPlugin: FlutterPlugin, MethodCallHandler, Ac
   }
 
   private fun writeFile(call: MethodCall, result: Result) {
+    if (activity == null) {
+      result.error("NoAct", "No active android activity", null)
+      return
+    }
 
+    val dir = call.argument<String>("dir")
+    val fileName = call.argument<String>("name")
+    val mimeType = call.argument<String>("mime")
+    val data = call.argument<ByteArray>("data")
+    if (dir == null || mimeType == null || fileName == null || data == null) {
+      result.error("ArgErr", "Wrong writeFile arguments passed to native implementation", null)
+      return
+    }
+
+    // Not compiled for older platform versions so true assert is fine
+    val dirUri = DocumentFile.fromTreeUri(activity!!.activity.applicationContext, Uri.parse(dir))!!
+    val file = try {
+      dirUri.createFile(mimeType, fileName)
+    } catch (e: UnsupportedOperationException) {
+      result.error("IOErr", e.message, null)
+      return
+    }!!
+
+    // Open file to write. Existing content will be truncated
+    try {
+      val stream = activity!!.activity.contentResolver.openOutputStream(file.uri, "wt")
+      try {
+        stream?.write(data)
+        result.success(true)
+      } finally {
+        stream?.close()
+      }
+    } catch (e: FileNotFoundException) {
+      result.error("NoFile", e.message, null)
+    } catch (e: IOException) {
+      result.error("IOErr", e.message, null)
+    }
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:persistent_user_dir_access_android/persistent_user_dir_access_android.dart';
@@ -11,7 +13,9 @@ void main() {
       body: ListTile(
         title: const Text('requestDirectoryUri()'),
         onTap: () async {
-          print(await PersistentUserDirAccessAndroid.requestDirectoryUri());
+          var x = await PersistentUserDirAccessAndroid.requestDirectoryUri();
+          print(x);
+          await PersistentUserDirAccessAndroid.writeFile(x!, 'tst', '*', utf8.encode('Test text'));
         },
       )
     ),
