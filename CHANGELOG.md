@@ -1,3 +1,5 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* implement easy to use API
+* implement picking directories
+* implement creating files in chosen directories
