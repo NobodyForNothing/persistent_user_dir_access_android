@@ -69,4 +69,32 @@ internal class PersistentUserDirAccessAndroidPluginTest {
     )
     Mockito.verify(mockResult).success("content://mockUri")
   }
+
+  @Test
+  fun onMethodCall_requestDirectoryUri_returnsNullOnNotPicket() {
+    // setup
+    val listenerCaptor = ArgumentCaptor.forClass(PluginRegistry.ActivityResultListener::class.java)
+    val reqCodeCaptor = ArgumentCaptor.forClass(Int::class.java)
+
+    val mockActivityPlugin = Mockito.mock(ActivityPluginBinding::class.java)
+    Mockito.doNothing().`when`(mockActivityPlugin).addActivityResultListener(listenerCaptor.capture())
+    val mockActivity = Mockito.mock(Activity::class.java)
+    Mockito.doReturn(mockActivity).`when`(mockActivityPlugin).activity
+
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(mockActivityPlugin)
+
+    val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+
+    // test
+    val call = MethodCall("requestDirectoryUri", null)
+    plugin.onMethodCall(call, mockResult)
+    Mockito.verify(mockActivityPlugin).activity
+    Mockito.verify(mockActivity).startActivityForResult(any(Intent::class.java), reqCodeCaptor.capture())
+
+    listenerCaptor.value.onActivityResult(reqCodeCaptor.value, Activity.RESULT_CANCELED, null)
+    Mockito.verifyNoMoreInteractions(mockActivity)
+    Mockito.verify(mockResult).success(null)
+  }
+
 }
