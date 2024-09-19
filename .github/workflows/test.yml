@@ -1,0 +1,45 @@
+name: 'Testing 🧪'
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  kotlin-tests:
+    name: "Run Android unit-tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/setup-java@v2
+        with:
+          java-version: "23"
+          distribution: "temurin"
+          cache: 'gradle'
+      - run: ./gradlew testDebugUnitTest --no-daemon
+        working-directory: example/android
+  plugin-unit-tests:
+    name: "Run Flutter unit-tests (plugin)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+          cache: true
+      - run: flutter config --no-analytics
+      - run: flutter test
+  example-unit-tests:
+    name: "Run Flutter unit-tests (example App)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+          cache: true
+      - run: flutter config --no-analytics
+      - run: flutter test
+        working-directory: example
