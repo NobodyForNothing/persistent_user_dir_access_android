@@ -1,7 +1,7 @@
 name: persistent_user_dir_access_android
-description: "A package that leverages androids ACTION_OPEN_DOCUMENT_TREE to persist write permissions for an user chosen directory."
+description: "A package that leverages androids ACTION_OPEN_DOCUMENT_TREE and persists write permissions for a user chosen directory."
 version: 0.0.1
-homepage:
+homepage: https://derdilla.com
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

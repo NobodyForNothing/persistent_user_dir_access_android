@@ -1,15 +1,35 @@
 # persistent_user_dir_access_android
 
-A package that leverages androids ACTION_OPEN_DOCUMENT_TREE to persist write permissions for an user chosen directory.
+A lightweight, 0-dependency (except flutter) package to let android-users choose
+a directory for writing data between app restarts. All code is fully tested and 
+documented.
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+Using this package is very straight forward, let me demonstrate:
+```dart
+Future<void> saveText(String text) async {
+  // Requiring a class instance allows for easy debugging.
+  final userDirs = userDirs = const PersistentUserDirAccessAndroid();
+  
+  // This shows the OS dir-picker to the users.
+  final String selectedDirUri = await userDirs.requestDirectoryUri();
+  
+  // You can always save a dir-URI for later use, even after app restarts.
+  this.selectedUri = selectedDirUri;
+  
+  // Pass your URI to the `writeFile` method to create a new file:
+  await userDirs.writeFile(
+    selectedDirUri,
+    'test.txt', // filename passed to android. The OS automatically avoids overriding files
+    'text/plain', // specify mime-type
+    utf8.encode(text), // Pass binary data
+  );
+}
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
 
+For more usage info, check out the `example` directory.
+
+## Contributing
+PRs and issues are welcome. Check out [CONTRIBUTING.md](./CONTRIBUTING.md) for more info.
