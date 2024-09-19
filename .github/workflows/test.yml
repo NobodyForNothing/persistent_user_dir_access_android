@@ -15,15 +15,15 @@ jobs:
         with:
           channel: beta
           cache: true
-      - run: flutter config --no-analytics
-      - name: Build testing resources
-        run: flutter build aab --debug
-        working-directory: example
+      - run: flutter config --no-analytics --suppress-analytics
       - uses: actions/setup-java@v2
         with:
           java-version: "17"
           distribution: "temurin"
           cache: 'gradle'
+      - name: Build testing resources
+        run: flutter build aab --debug
+        working-directory: example
       - run: ./gradlew testDebugUnitTest --no-daemon
         working-directory: example/android
   plugin-unit-tests:
@@ -36,7 +36,7 @@ jobs:
         with:
           channel: beta
           cache: true
-      - run: flutter config --no-analytics
+      - run: flutter config --no-analytics --suppress-analytics
       - run: flutter test
   example-unit-tests:
     name: "[example] Flutter unit"
@@ -48,6 +48,6 @@ jobs:
         with:
           channel: beta
           cache: true
-      - run: flutter config --no-analytics
+      - run: flutter config --no-analytics --suppress-analytics
       - run: flutter test
         working-directory: example
