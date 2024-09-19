@@ -8,12 +8,16 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import kotlin.test.Test
 import org.mockito.Mockito
+import java.lang.NullPointerException
+import kotlin.test.assertContains
+import kotlin.test.expect
 
 /*
  * Once you have built the plugin's example app, you can run these tests from the command
@@ -27,7 +31,7 @@ internal class PersistentUserDirAccessAndroidPluginTest {
     val plugin = PersistentUserDirAccessAndroidPlugin()
 
     val call = MethodCall("requestDirectoryUri", null)
-    val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
     plugin.onMethodCall(call, mockResult)
 
     Mockito.verify(mockResult).error("NoAct", "No active android activity", null)
@@ -40,7 +44,8 @@ internal class PersistentUserDirAccessAndroidPluginTest {
     val reqCodeCaptor = ArgumentCaptor.forClass(Int::class.java)
 
     val mockActivityPlugin = Mockito.mock(ActivityPluginBinding::class.java)
-    Mockito.doNothing().`when`(mockActivityPlugin).addActivityResultListener(listenerCaptor.capture())
+    Mockito.doNothing().`when`(mockActivityPlugin)
+      .addActivityResultListener(listenerCaptor.capture())
     val mockActivity = Mockito.mock(Activity::class.java)
     Mockito.doReturn(mockActivity).`when`(mockActivityPlugin).activity
     val mockContentResolver = Mockito.mock(ContentResolver::class.java)
@@ -54,13 +59,14 @@ internal class PersistentUserDirAccessAndroidPluginTest {
     val plugin = PersistentUserDirAccessAndroidPlugin()
     plugin.onAttachedToActivity(mockActivityPlugin)
 
-    val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
 
     // test
     val call = MethodCall("requestDirectoryUri", null)
     plugin.onMethodCall(call, mockResult)
     Mockito.verify(mockActivityPlugin).activity
-    Mockito.verify(mockActivity).startActivityForResult(any(Intent::class.java), reqCodeCaptor.capture())
+    Mockito.verify(mockActivity)
+      .startActivityForResult(any(Intent::class.java), reqCodeCaptor.capture())
 
     listenerCaptor.value.onActivityResult(reqCodeCaptor.value, Activity.RESULT_OK, mockIntent)
     Mockito.verify(mockContentResolver).takePersistableUriPermission(
@@ -77,24 +83,130 @@ internal class PersistentUserDirAccessAndroidPluginTest {
     val reqCodeCaptor = ArgumentCaptor.forClass(Int::class.java)
 
     val mockActivityPlugin = Mockito.mock(ActivityPluginBinding::class.java)
-    Mockito.doNothing().`when`(mockActivityPlugin).addActivityResultListener(listenerCaptor.capture())
+    Mockito.doNothing().`when`(mockActivityPlugin)
+      .addActivityResultListener(listenerCaptor.capture())
     val mockActivity = Mockito.mock(Activity::class.java)
     Mockito.doReturn(mockActivity).`when`(mockActivityPlugin).activity
 
     val plugin = PersistentUserDirAccessAndroidPlugin()
     plugin.onAttachedToActivity(mockActivityPlugin)
 
-    val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
 
     // test
     val call = MethodCall("requestDirectoryUri", null)
     plugin.onMethodCall(call, mockResult)
     Mockito.verify(mockActivityPlugin).activity
-    Mockito.verify(mockActivity).startActivityForResult(any(Intent::class.java), reqCodeCaptor.capture())
+    Mockito.verify(mockActivity)
+      .startActivityForResult(any(Intent::class.java), reqCodeCaptor.capture())
 
     listenerCaptor.value.onActivityResult(reqCodeCaptor.value, Activity.RESULT_CANCELED, null)
     Mockito.verifyNoMoreInteractions(mockActivity)
     Mockito.verify(mockResult).success(null)
   }
 
+  @Test
+  fun onMethodCall_writeFile_returnsErrorWhenNoActivity() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+
+    val call = MethodCall("writeFile", null)
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(call, mockResult)
+
+    Mockito.verify(mockResult).error("NoAct", "No active android activity", null)
+  }
+
+  @Test
+  fun onMethodCall_writeFile_returnsErrorWhenMissingDirArgument() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(Mockito.mock(ActivityPluginBinding::class.java))
+
+    val call = MethodCall(
+      "writeFile", mapOf(
+        "name" to "sample.txt",
+        "mime" to "text/plain",
+        "data" to "Some sample text".encodeToByteArray(),
+      )
+    )
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(call, mockResult)
+
+    Mockito.verify(mockResult)
+      .error("ArgErr", "Wrong writeFile arguments passed to native implementation", null)
+  }
+
+  @Test
+  fun onMethodCall_writeFile_returnsErrorWhenMissingNameArgument() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(Mockito.mock(ActivityPluginBinding::class.java))
+
+    val call = MethodCall(
+      "writeFile", mapOf(
+        "dir" to "content://sample-dir",
+        "mime" to "text/plain",
+        "data" to "Some sample text".encodeToByteArray(),
+      )
+    )
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(call, mockResult)
+
+    Mockito.verify(mockResult)
+      .error("ArgErr", "Wrong writeFile arguments passed to native implementation", null)
+  }
+
+  @Test
+  fun onMethodCall_writeFile_returnsErrorWhenMissingMimeArgument() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(Mockito.mock(ActivityPluginBinding::class.java))
+
+    val call = MethodCall(
+      "writeFile", mapOf(
+        "dir" to "content://sample-dir",
+        "name" to "sample.txt",
+        "data" to "Some sample text".encodeToByteArray(),
+      )
+    )
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(call, mockResult)
+
+    Mockito.verify(mockResult)
+      .error("ArgErr", "Wrong writeFile arguments passed to native implementation", null)
+  }
+
+  @Test
+  fun onMethodCall_writeFile_returnsErrorWhenMissingDataArgument() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(Mockito.mock(ActivityPluginBinding::class.java))
+
+    val call = MethodCall(
+      "writeFile", mapOf(
+        "dir" to "content://sample-dir",
+        "name" to "sample.txt",
+        "mime" to "text/plain",
+      )
+    )
+    val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(call, mockResult)
+
+    Mockito.verify(mockResult)
+      .error("ArgErr", "Wrong writeFile arguments passed to native implementation", null)
+  }
+
+  @Test
+  fun onMethodCall_writeFile_returnsNoErrorWhenPassingAllArguments() {
+    val plugin = PersistentUserDirAccessAndroidPlugin()
+    plugin.onAttachedToActivity(Mockito.mock(ActivityPluginBinding::class.java))
+
+    val call = MethodCall("writeFile", mapOf(
+      "dir" to "content://sample-dir",
+      "name" to "sample.txt",
+      "mime" to "text/plain",
+      "data" to "Some sample text".encodeToByteArray(),
+    ))
+    val exception = assertThrows<NullPointerException> {
+      // No further testing possible without mocking the android api
+      plugin.onMethodCall(call, Mockito.mock(MethodChannel.Result::class.java))
+    }
+    assertContains(exception.message!!, "getActivity()\" is null");
+  }
 }
