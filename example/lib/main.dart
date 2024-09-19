@@ -7,7 +7,13 @@ import 'package:persistent_user_dir_access_android/persistent_user_dir_access_an
 void main() => runApp(const MaterialApp(home: App()));
 
 class App extends StatefulWidget {
-  const App({super.key});
+  const App({
+    super.key,
+    this.userDirs = const PersistentUserDirAccessAndroid(),
+  });
+
+  /// User dirs implementation.
+  final PersistentUserDirAccessAndroid userDirs;
 
   @override
   State<App> createState() => _AppState();
@@ -20,7 +26,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User di sample app'),
+        title: const Text('User dir sample app'),
       ),
       body: ListView(
         children: [
@@ -28,7 +34,7 @@ class _AppState extends State<App> {
           ListTile(
             title: const Text('requestDirectoryUri()'),
             onTap: () async {
-              final dirUri = await PersistentUserDirAccessAndroid.requestDirectoryUri();
+              final dirUri = await widget.userDirs.requestDirectoryUri();
               setState(() {
                 _uri = dirUri;
               });
@@ -37,7 +43,7 @@ class _AppState extends State<App> {
           ListTile(
             title: const Text("writeFile(uri, 'test.txt', 'text/plain', utf8.encode('Test text'))"),
             onTap: _uri == null ? null : () async {
-              await PersistentUserDirAccessAndroid.writeFile(_uri!, 'test.txt', 'text/plain', utf8.encode('Test text'));
+              await widget.userDirs.writeFile(_uri!, 'test.txt', 'text/plain', utf8.encode('Test text'));
             },
           )
         ],

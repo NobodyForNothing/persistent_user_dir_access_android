@@ -8,6 +8,11 @@ import 'package:flutter/services.dart';
 /// All exceptions are caught. Optional logging can be enabled through
 /// [doLogging].
 class PersistentUserDirAccessAndroid {
+  // Intentionally not static to improve mock- and testability
+
+  /// Initialize class for working with external android directories.
+  const PersistentUserDirAccessAndroid();
+
   static const _channel = MethodChannel('persistent_user_dir_access_android');
 
   /// Whether to print log messages.
@@ -19,7 +24,7 @@ class PersistentUserDirAccessAndroid {
   ///
   /// Returns null when canceled or picking is not possible. There is no
   /// guarantee other methods work with a modified Uri.
-  static Future<String?> requestDirectoryUri() async {
+  Future<String?> requestDirectoryUri() async {
     try {
       final uri = await _channel.invokeMethod<String>('requestDirectoryUri');
       if (uri?.isEmpty ?? true) return null;
@@ -36,7 +41,7 @@ class PersistentUserDirAccessAndroid {
   /// `*/*`, `image/png` or `audio/flac`.
   ///
   /// Returns success state of the operation.
-  static Future<bool> writeFile(String dirUri, String fileName, String mimeType, Uint8List data) async {
+  Future<bool> writeFile(String dirUri, String fileName, String mimeType, Uint8List data) async {
     try {
       final res = await _channel.invokeMethod<bool>('writeFile', <String, dynamic>{
         'dir': dirUri,
