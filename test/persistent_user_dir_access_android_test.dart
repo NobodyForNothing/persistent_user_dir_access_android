@@ -5,10 +5,12 @@ import 'package:persistent_user_dir_access_android/persistent_user_dir_access_an
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const MethodChannel channel = MethodChannel('persistent_user_dir_access_android');
+  const MethodChannel channel =
+      MethodChannel('persistent_user_dir_access_android');
 
   test('Propagates directory URI', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
       channel,
       (MethodCall methodCall) async {
         expect(methodCall.method, 'requestDirectoryUri');
@@ -16,7 +18,8 @@ void main() {
         return 'content://sample/uri';
       },
     );
-    final uri = await const PersistentUserDirAccessAndroid().requestDirectoryUri();
+    final uri =
+        await const PersistentUserDirAccessAndroid().requestDirectoryUri();
     expect(uri, 'content://sample/uri');
   });
   // TODO: errors, writeFile

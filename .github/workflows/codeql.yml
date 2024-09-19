@@ -5,12 +5,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  plugin-lints:
+  dart-lints:
     name: "Dart linting"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: beta
@@ -18,6 +17,16 @@ jobs:
       - run: flutter config --no-analytics --suppress-analytics
       - name: "Plugin lints"
         run: flutter analyze
-      - name: "Example app lints"
+      - name: "Example lints"
         run: flutter analyze
         working-directory: example
+  dart-format:
+    name: "Dart format"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - name: "Plugin format"
+        run: dart format --output show  --set-exit-if-changed .
+      - name: "Example format"
+        run: dart format --output show  --set-exit-if-changed example

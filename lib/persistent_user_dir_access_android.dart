@@ -41,9 +41,11 @@ class PersistentUserDirAccessAndroid {
   /// `*/*`, `image/png` or `audio/flac`.
   ///
   /// Returns success state of the operation.
-  Future<bool> writeFile(String dirUri, String fileName, String mimeType, Uint8List data) async {
+  Future<bool> writeFile(
+      String dirUri, String fileName, String mimeType, Uint8List data) async {
     try {
-      final res = await _channel.invokeMethod<bool>('writeFile', <String, dynamic>{
+      final res =
+          await _channel.invokeMethod<bool>('writeFile', <String, dynamic>{
         'dir': dirUri,
         'name': fileName,
         'mime': mimeType,
