@@ -22,4 +22,3 @@ flutter:
       android:
         package: com.derdilla.persistent_user_dir_access_android
         pluginClass: PersistentUserDirAccessAndroidPlugin
-
