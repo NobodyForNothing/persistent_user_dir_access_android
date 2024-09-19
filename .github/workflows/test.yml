@@ -6,11 +6,19 @@ on:
 
 jobs:
   kotlin-tests:
-    name: "Run Android unit-tests"
+    name: "[plugin] Android unit"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+          cache: true
+      - run: flutter config --no-analytics
+      - name: Build testing resources
+        run: flutter build aab --debug
+        working-directory: example
       - uses: actions/setup-java@v2
         with:
           java-version: "23"
@@ -19,7 +27,7 @@ jobs:
       - run: ./gradlew testDebugUnitTest --no-daemon
         working-directory: example/android
   plugin-unit-tests:
-    name: "Run Flutter unit-tests (plugin)"
+    name: "[plugin] Flutter unit"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -31,7 +39,7 @@ jobs:
       - run: flutter config --no-analytics
       - run: flutter test
   example-unit-tests:
-    name: "Run Flutter unit-tests (example App)"
+    name: "[example] Flutter unit"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
