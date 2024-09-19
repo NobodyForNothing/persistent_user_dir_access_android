@@ -1,6 +1,7 @@
 name: persistent_user_dir_access_android_example
 description: "Demonstrates how to use the persistent_user_dir_access_android plugin."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
