@@ -4,7 +4,7 @@ If you notice issues: reports, debugging or patches are highly appreciated. This
 All code in this repository should be formated, documented, tested and if applicable showcased in the example app. Since this is a tiny plugin I don't expect many contributions too you don't need to do any of it yourself to contribute but those are highly appreciated. If you are stuck somewhere in your contribution feel free to reach out.
 
 ## Setup
-1. `git clone https://github.com/NobodyForNothing/persistent_user_dir_access_android.git`
+1. `git clone https://github.com/derdilla/persistent_user_dir_access_android.git`
 2. Flutter [setup](https://docs.flutter.dev/get-started/install)
 3. Add your Code and `cd persistent_user_dir_access_android/example && flutter run`
 
