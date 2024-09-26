@@ -32,4 +32,4 @@ Future<void> saveText(String text) async {
 For more usage info, check out the `example` directory.
 
 ## Contributing
-PRs and issues are welcome. Check out [CONTRIBUTING.md](https://github.com/NobodyForNothing/persistent_user_dir_access_android/blob/main/CONTRIBUTING.md) for more info.
+PRs and issues are welcome. Check out [CONTRIBUTING.md](https://github.com/derdilla/persistent_user_dir_access_android/blob/main/CONTRIBUTING.md) for more info.
