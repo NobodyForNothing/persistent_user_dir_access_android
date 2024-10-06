@@ -1,7 +1,14 @@
 name: persistent_user_dir_access_android
 description: "A package that leverages androids ACTION_OPEN_DOCUMENT_TREE and persists write permissions for a user chosen directory."
 version: 0.0.1
-homepage: https://derdilla.com
+repository: https://github.com/derdilla/persistent_user_dir_access_android
+issue_tracker: https://github.com/derdilla/persistent_user_dir_access_android/issues
+topics:
+  - storage
+  - picker
+  - android
+  - directory-picker
+  - file-selection
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
